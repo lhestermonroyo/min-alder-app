@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { Button, TextInput } from 'react-native-paper';
-import { Box, Heading, ScrollView, Spacer, VStack } from 'native-base';
+import { TextInput } from 'react-native-paper';
+import { Box, Heading, ScrollView, VStack } from 'native-base';
+import { collection, addDoc } from 'firebase/firestore';
+import db from '../../../../../firebaseConfig';
 
 import AppInput from '../../../../components/app-input';
 import AppButton from '../../../../components/app-button';
@@ -9,8 +11,22 @@ const RegisterForm = () => {
   const [value, setValue] = useState({
     email: '',
     password: '',
+    confirmPassword: '',
   });
   const [showPassword, setShowPassword] = useState(false);
+
+  const handleSubmit = async () => {
+    try {
+      const response = await addDoc(collection(db, 'users'), {
+        email: value.email,
+        password: value.password,
+        createdAt: new Date(),
+      });
+      console.log('[handleSubmit] response', response);
+    } catch (error) {
+      console.log('[handleSubmit] error', error);
+    }
+  };
 
   return (
     <ScrollView paddingX={6}>
@@ -52,7 +68,7 @@ const RegisterForm = () => {
         />
 
         <VStack alignItems="center" space={4}>
-          <AppButton text="Tilmelde" />
+          <AppButton text="Tilmelde" onPress={handleSubmit} />
 
           <Heading size="sm" textAlign="center" color="white">
             Eller tilmeld dig med

@@ -21,7 +21,6 @@ export default function App() {
       'jakarta-sans-medium': require('./assets/fonts/PlusJakartaSans-Medium.ttf'),
       'jakarta-sans-semibold': require('./assets/fonts/PlusJakartaSans-SemiBold.ttf'),
       'jakarta-sans-bold': require('./assets/fonts/PlusJakartaSans-Bold.ttf'),
-      // You can add more variations (e.g., bold, italic) if needed
     });
   }, []);
 
