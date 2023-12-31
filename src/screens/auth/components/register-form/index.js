@@ -1,13 +1,19 @@
 import React, { useState } from 'react';
 import { TextInput } from 'react-native-paper';
 import { Box, Heading, ScrollView, VStack } from 'native-base';
-import { collection, addDoc } from 'firebase/firestore';
-import db from '../../../../../firebaseConfig';
+import { collection, addDoc, getFirestore } from 'firebase/firestore';
+import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 
 import AppInput from '../../../../components/app-input';
 import AppButton from '../../../../components/app-button';
 
+import app from '../../../../../firebaseConfig';
+
+const db = getFirestore(app);
+const auth = getAuth(app);
+
 const RegisterForm = () => {
+  const [loading, setLoading] = useState(false);
   const [value, setValue] = useState({
     email: '',
     password: '',
@@ -17,14 +23,29 @@ const RegisterForm = () => {
 
   const handleSubmit = async () => {
     try {
-      const response = await addDoc(collection(db, 'users'), {
-        email: value.email,
-        password: value.password,
-        createdAt: new Date(),
-      });
-      console.log('[handleSubmit] response', response);
+      setLoading(true);
+
+      const userCred = await createUserWithEmailAndPassword(
+        auth,
+        value.email,
+        value.password
+      );
+
+      if (userCred) {
+        console.log('[handleSubmit] userCred', userCred);
+
+        const response = await addDoc(collection(db, 'users'), {
+          email: userCred.user.email,
+          uid: userCred.user.uid,
+          createdAt: new Date(),
+        });
+
+        console.log('[handleSubmit] response', response);
+      }
     } catch (error) {
       console.log('[handleSubmit] error', error);
+    } finally {
+      setLoading(false);
     }
   };
 

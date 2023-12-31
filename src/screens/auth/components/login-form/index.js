@@ -1,16 +1,56 @@
 import React, { useState } from 'react';
 import { Button, TextInput } from 'react-native-paper';
-import { Box, Heading, ScrollView, Spacer, VStack } from 'native-base';
+import { Box, Heading, ScrollView, VStack } from 'native-base';
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { useRecoilState } from 'recoil';
 
 import AppInput from '../../../../components/app-input';
 import AppButton from '../../../../components/app-button';
 
+import states from '../../../../states';
+import app from '../../../../../firebaseConfig';
+
+const fbAuth = getAuth(app);
+
 const LoginForm = () => {
+  const [loading, setLoading] = useState(false);
   const [value, setValue] = useState({
     email: '',
     password: '',
   });
   const [showPassword, setShowPassword] = useState(false);
+
+  const [auth, setAuth] = useRecoilState(states.auth);
+
+  const handleSubmit = async () => {
+    try {
+      setLoading(true);
+
+      const userCred = await signInWithEmailAndPassword(
+        fbAuth,
+        value.email,
+        value.password
+      );
+
+      if (userCred) {
+        console.log('[handleSubmit] userCred', userCred);
+
+        setAuth({
+          ...auth,
+          authenticated: !!userCred?.uid,
+          user: {
+            uid: userCred?.uid,
+            name: userCred?.displayName,
+            email: userCred?.email,
+          },
+        });
+      }
+    } catch (error) {
+      console.log('[handleSubmit] error', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <ScrollView paddingX={6}>
@@ -47,7 +87,7 @@ const LoginForm = () => {
         />
 
         <VStack alignItems="center" space={4}>
-          <AppButton text="Kom igang" />
+          <AppButton text="Kom igang" onPress={handleSubmit} />
 
           <Heading size="sm" textAlign="center" color="white">
             Eller log ind med

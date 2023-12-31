@@ -1,5 +1,5 @@
-import { Text, VStack } from 'native-base';
 import React from 'react';
+import { Text, VStack } from 'native-base';
 import { TextInput } from 'react-native-paper';
 
 const AppInput = ({

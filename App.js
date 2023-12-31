@@ -1,18 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import * as Font from 'expo-font';
 import { NavigationContainer } from '@react-navigation/native';
-import { NativeBaseProvider, extendTheme, Text } from 'native-base';
+import { NativeBaseProvider, extendTheme } from 'native-base';
 import { PaperProvider } from 'react-native-paper';
 import { RecoilRoot } from 'recoil';
 
-import Public from './src/navigators/public';
+import RootContainer from './src/RootContainer';
 
 const LinearGradient = require('expo-linear-gradient').LinearGradient;
 
 export default function App() {
-  const [authenticated, setAuthenticated] = useState(false);
-
   useEffect(() => {
     // Load the Jakarta Sans font
     Font.loadAsync({
@@ -82,11 +80,7 @@ export default function App() {
         <PaperProvider>
           <StatusBar style="auto" />
           <NavigationContainer>
-            {authenticated ? (
-              <Text color="amber.500">Authenticated</Text>
-            ) : (
-              <Public />
-            )}
+            <RootContainer />
           </NavigationContainer>
         </PaperProvider>
       </NativeBaseProvider>
