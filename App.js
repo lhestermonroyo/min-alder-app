@@ -51,6 +51,20 @@ export default function App() {
         },
       },
     },
+    colors: {
+      primary: {
+        50: '#a59cf7',
+        100: '#9388f5',
+        200: '#8174f4',
+        300: '#6f61f2',
+        400: '#5d4df1',
+        500: '#4b39ef',
+        600: '#4433d7',
+        700: '#3c2ebf',
+        800: '#3528a7',
+        900: '#2d228f',
+      },
+    },
     fonts: {
       heading: 'JakartaSans',
       body: 'JakartaSans',

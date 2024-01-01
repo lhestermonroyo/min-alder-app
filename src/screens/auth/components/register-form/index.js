@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
-import { TextInput } from 'react-native-paper';
-import { Box, Heading, ScrollView, VStack } from 'native-base';
+import {
+  Box,
+  Divider,
+  HStack,
+  ScrollView,
+  VStack,
+  IconButton,
+  Text,
+} from 'native-base';
+import { Ionicons } from '@expo/vector-icons';
 import { collection, addDoc, getFirestore } from 'firebase/firestore';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 
@@ -12,14 +20,17 @@ import app from '../../../../../firebaseConfig';
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-const RegisterForm = () => {
+const RegisterForm = ({ handleIndex }) => {
   const [loading, setLoading] = useState(false);
   const [value, setValue] = useState({
     email: '',
     password: '',
     confirmPassword: '',
   });
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState({
+    password: false,
+    confirmPassword: false,
+  });
 
   const handleSubmit = async () => {
     try {
@@ -52,15 +63,9 @@ const RegisterForm = () => {
   return (
     <ScrollView paddingX={6}>
       <VStack space={4} justifyContent="center" flex={1}>
-        <VStack>
-          <Heading fontSize={32}>Opret konto</Heading>
-          <Heading size="sm" color="white">
-            Lad os komme i gang ved at udfylde formularen nedenfor.
-          </Heading>
-        </VStack>
-
         <AppInput
           label="E-mail"
+          placeholder="Indtast e-mail"
           value={value.email}
           onChangeText={email =>
             setValue({
@@ -72,6 +77,7 @@ const RegisterForm = () => {
 
         <AppInput
           label="Adgangskodea"
+          placeholder="Indtast adgangskode"
           value={value.password}
           onChangeText={password =>
             setValue({
@@ -79,26 +85,99 @@ const RegisterForm = () => {
               password,
             })
           }
-          secureTextEntry={showPassword}
-          right={
-            <TextInput.Icon
-              onPress={() => setShowPassword(!showPassword)}
-              icon={showPassword ? 'eye-off' : 'eye'}
+          secureTextEntry={!showPassword.password}
+          rightElement={
+            <IconButton
+              size="md"
+              variant="link"
+              icon={
+                showPassword ? (
+                  <Ionicons name="md-eye-off-outline" size={18} />
+                ) : (
+                  <Ionicons name="md-eye-outline" size={18} />
+                )
+              }
+              onPress={() =>
+                setShowPassword({
+                  ...showPassword,
+                  password: !showPassword.password,
+                })
+              }
             />
           }
         />
 
-        <VStack alignItems="center" space={4}>
-          <AppButton text="Tilmelde" onPress={handleSubmit} />
+        <AppInput
+          label="Bekræft adgangskode"
+          placeholder="Indtast bekræft adgangskode"
+          value={value.confirmPassword}
+          onChangeText={confirmPassword =>
+            setValue({
+              ...value,
+              confirmPassword,
+            })
+          }
+          secureTextEntry={!showPassword.confirmPassword}
+          rightElement={
+            <IconButton
+              size="md"
+              variant="link"
+              icon={
+                showPassword ? (
+                  <Ionicons name="md-eye-off-outline" size={18} />
+                ) : (
+                  <Ionicons name="md-eye-outline" size={18} />
+                )
+              }
+              onPress={() =>
+                setShowPassword({
+                  ...showPassword,
+                  confirmPassword: !showPassword.confirmPassword,
+                })
+              }
+            />
+          }
+        />
 
-          <Heading size="sm" textAlign="center" color="white">
-            Eller tilmeld dig med
-          </Heading>
-          <AppButton mode="outlined" icon="google" text="Fortsæt med Google" />
-          <AppButton mode="outlined" icon="apple" text="Fortsæt med Apple" />
-        </VStack>
+        <AppButton
+          text="Kom igang"
+          isLoading={loading}
+          onPress={handleSubmit}
+        />
+
+        <Box marginTop={6}>
+          <Divider />
+          <VStack top={-12} alignItems="center">
+            <Box backgroundColor="#fff" paddingX={4}>
+              <Text textAlign="center" color="gray.800">
+                Eller tilmeld dig med
+              </Text>
+            </Box>
+          </VStack>
+        </Box>
+
+        <HStack space={4} justifyContent="center">
+          <IconButton
+            variant="outline"
+            borderRadius="full"
+            width={50}
+            height={50}
+            icon={<Ionicons name="logo-google" size={24} color="#4b39ef" />}
+          />
+          <IconButton
+            variant="outline"
+            borderRadius="full"
+            width={50}
+            height={50}
+            icon={<Ionicons name="logo-apple" size={24} color="#4b39ef" />}
+          />
+        </HStack>
+
+        <Text marginTop={12} textAlign="center" color="gray.800">
+          Har du ikke en konto endnu?
+          <AppButton variant="link" text="Log ind" onPress={handleIndex} />
+        </Text>
       </VStack>
-      <Box paddingBottom={12} />
     </ScrollView>
   );
 };

@@ -20,27 +20,16 @@ const Auth = () => {
 
   const renderTabBar = props => {
     return (
-      <Box
-        alignSelf="center"
-        marginTop={6}
-        marginBottom={4}
-        borderBottomWidth={1}
-        flexDirection="row"
-        background="white"
-        borderColor="black"
-        borderWidth={1}
-        borderRadius={12}
-        width={290}
-      >
+      <Box alignSelf="center" marginY={6} flexDirection="row" width={225}>
         {props.navigationState.routes.map((route, i) => {
           return (
             <Box
               key={i}
+              borderRightWidth={i === 0 && 1}
+              borderColor="#4b39ef"
               flex={1}
               padding={2}
-              background={index === i ? '#e0e3e7' : 'white'}
               alignItems="center"
-              borderRadius={12}
             >
               <Pressable
                 onPress={() => {
@@ -49,8 +38,8 @@ const Auth = () => {
               >
                 <Text
                   fontSize={18}
-                  fontWeight="medium"
-                  color={index === i ? 'gray.500' : 'black'}
+                  fontWeight={index === i ? 'bold' : 'normal'}
+                  color={index === i ? '#4b39ef' : 'gray.800'}
                 >
                   {route.title}
                 </Text>
@@ -64,9 +53,9 @@ const Auth = () => {
   const renderScene = ({ route }) => {
     switch (route.key) {
       case 'login':
-        return <LoginForm />;
+        return <LoginForm handleIndex={() => setIndex(1)} />;
       case 'register':
-        return <RegisterForm />;
+        return <RegisterForm handleIndex={() => setIndex(0)} />;
       default:
         return null;
     }
@@ -75,49 +64,36 @@ const Auth = () => {
   return (
     <Layout>
       <Box flex={1} justifyContent="center">
-        <Stack>
-          <Box
-            marginX={10}
-            height={230}
-            borderRadius={16}
-            borderColor="white"
-            borderWidth={1}
-            background={{
-              linearGradient: {
-                colors: ['#105dfb', '#8ac7ff'],
-              },
-            }}
-            paddingTop={10}
-            alignItems="center"
-          >
-            <Heading fontSize={36} fontWeight="medium">
-              MinAlder
-            </Heading>
-          </Box>
-          <Stack marginX={4}>
-            <Box
-              style={{
-                marginTop: -110,
-              }}
-              alignSelf="center"
-              width="full"
-              maxWidth={570}
-              height={530}
-              borderRadius={16}
-              borderColor="white"
-              borderWidth={2}
-              background="#105dfb"
-            >
-              <TabView
-                navigationState={{ index, routes }}
-                renderTabBar={renderTabBar}
-                renderScene={renderScene}
-                onIndexChange={setIndex}
-                initialLayout={{ width: layout.width }}
-              />
-            </Box>
-          </Stack>
-        </Stack>
+        <Box
+          height="1/6"
+          background={{
+            linearGradient: {
+              colors: ['#105dfb', '#8ac7ff'],
+            },
+          }}
+          justifyContent="center"
+          alignItems="center"
+        >
+          <Heading fontSize={36} fontWeight="medium" color="#fff">
+            MinAlder
+          </Heading>
+        </Box>
+        <Box
+          flex={1}
+          borderTopRadius={24}
+          alignSelf="center"
+          width="full"
+          background="#fff"
+        >
+          <TabView
+            swipeEnabled={false}
+            navigationState={{ index, routes }}
+            renderTabBar={renderTabBar}
+            renderScene={renderScene}
+            onIndexChange={setIndex}
+            initialLayout={{ width: layout.width }}
+          />
+        </Box>
       </Box>
     </Layout>
   );

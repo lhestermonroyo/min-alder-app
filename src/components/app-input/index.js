@@ -1,35 +1,38 @@
 import React from 'react';
-import { Text, VStack } from 'native-base';
-import { TextInput } from 'react-native-paper';
+import { Text, FormControl, Input } from 'native-base';
 
 const AppInput = ({
   label,
+  placeholder,
   secureTextEntry,
   value,
   onChangeText,
-  right = null,
+  rightElement = null,
   error,
 }) => {
   return (
-    <VStack>
-      <TextInput
-        label={label}
-        value={value}
+    <FormControl>
+      <FormControl.Label>{label}</FormControl.Label>
+      <Input
+        variant="outline"
+        size="lg"
+        padding={4}
+        type="text"
+        placeholder={placeholder}
         onChangeText={onChangeText}
+        value={value}
+        textContentType="none"
+        autoCapitalize="none"
+        autoCorrect={false}
         secureTextEntry={secureTextEntry}
-        mode="outlined"
-        outlineColor="#e0e3e7"
-        right={right}
-        style={{
-          backgroundColor: '#cfdffe',
-        }}
-        outlineStyle={{
-          borderRadius: 8,
-          borderWidth: 2,
-        }}
+        rightElement={rightElement}
       />
-      {error && <Text color="error.400">{error}</Text>}
-    </VStack>
+      {error && (
+        <FormControl.HelperText color="error.400" fontSize="xs">
+          {error}
+        </FormControl.HelperText>
+      )}
+    </FormControl>
   );
 };
 

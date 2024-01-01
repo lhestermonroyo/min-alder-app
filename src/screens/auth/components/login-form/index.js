@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
-import { Button, TextInput } from 'react-native-paper';
-import { Box, Heading, ScrollView, VStack } from 'native-base';
+import {
+  Box,
+  IconButton,
+  ScrollView,
+  Divider,
+  VStack,
+  Text,
+  HStack,
+} from 'native-base';
+import { Ionicons } from '@expo/vector-icons';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { useRecoilState } from 'recoil';
 
@@ -12,7 +20,7 @@ import app from '../../../../../firebaseConfig';
 
 const fbAuth = getAuth(app);
 
-const LoginForm = () => {
+const LoginForm = ({ handleIndex }) => {
   const [loading, setLoading] = useState(false);
   const [value, setValue] = useState({
     email: '',
@@ -55,10 +63,9 @@ const LoginForm = () => {
   return (
     <ScrollView paddingX={6}>
       <VStack space={4} justifyContent="center" flex={1}>
-        <Heading fontSize={32}>Opret konto</Heading>
-
         <AppInput
           label="E-mail"
+          placeholder="Indtast e-mail"
           value={value.email}
           onChangeText={email =>
             setValue({
@@ -70,6 +77,7 @@ const LoginForm = () => {
 
         <AppInput
           label="Adgangskodea"
+          placeholder="Indtast adgangskode"
           value={value.password}
           onChangeText={password =>
             setValue({
@@ -77,38 +85,60 @@ const LoginForm = () => {
               password,
             })
           }
-          secureTextEntry={showPassword}
-          right={
-            <TextInput.Icon
+          secureTextEntry={!showPassword}
+          rightElement={
+            <IconButton
+              size="md"
+              variant="link"
+              icon={
+                showPassword ? (
+                  <Ionicons name="md-eye-off-outline" size={18} />
+                ) : (
+                  <Ionicons name="md-eye-outline" size={18} />
+                )
+              }
               onPress={() => setShowPassword(!showPassword)}
-              icon={showPassword ? 'eye-off' : 'eye'}
             />
           }
         />
 
-        <VStack alignItems="center" space={4}>
-          <AppButton text="Kom igang" onPress={handleSubmit} />
+        <AppButton variant="link" text="Glemt Adgangskode?" />
 
-          <Heading size="sm" textAlign="center" color="white">
-            Eller log ind med
-          </Heading>
-          <AppButton mode="outlined" icon="google" text="Fortsæt med Google" />
-          <AppButton mode="outlined" icon="apple" text="Fortsæt med Apple" />
+        <AppButton text="Log ind" isLoading={loading} onPress={handleSubmit} />
 
-          <Button
-            mode="outlined"
-            buttonColor="#fff"
-            textColor="#000"
-            style={{
-              borderColor: '#ccc',
-              borderWidth: 1,
-            }}
-          >
-            Glemt kodeord?
-          </Button>
-        </VStack>
+        <Box marginTop={6}>
+          <Divider />
+          <VStack top={-12} alignItems="center">
+            <Box backgroundColor="#fff" paddingX={4}>
+              <Text textAlign="center" color="gray.800">
+                Eller log ind med
+              </Text>
+            </Box>
+          </VStack>
+        </Box>
+
+        <HStack space={4} justifyContent="center">
+          <IconButton
+            variant="outline"
+            borderRadius="full"
+            width={50}
+            height={50}
+            icon={<Ionicons name="logo-google" size={24} color="#4b39ef" />}
+          />
+          <IconButton
+            variant="outline"
+            borderRadius="full"
+            width={50}
+            height={50}
+            icon={<Ionicons name="logo-apple" size={24} color="#4b39ef" />}
+          />
+        </HStack>
+
+        <Text marginTop={12} textAlign="center" color="gray.800">
+          Har du allerede en bruger?
+          <AppButton variant="link" text="Tilmelde" onPress={handleIndex} />
+        </Text>
       </VStack>
-      <Box paddingBottom={12} />
     </ScrollView>
   );
 };
