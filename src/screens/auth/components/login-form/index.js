@@ -9,7 +9,12 @@ import {
   HStack,
 } from 'native-base';
 import { Ionicons } from '@expo/vector-icons';
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
+} from 'firebase/auth';
 import { useRecoilState } from 'recoil';
 
 import AppInput from '../../../../components/app-input';
@@ -19,6 +24,7 @@ import states from '../../../../states';
 import app from '../../../../../firebaseConfig';
 
 const fbAuth = getAuth(app);
+const provider = new GoogleAuthProvider();
 
 const LoginForm = ({ handleIndex }) => {
   const [loading, setLoading] = useState(false);
@@ -29,6 +35,18 @@ const LoginForm = ({ handleIndex }) => {
   const [showPassword, setShowPassword] = useState(false);
 
   const [auth, setAuth] = useRecoilState(states.auth);
+
+  const authenticateUser = userCred => {
+    setAuth({
+      ...auth,
+      authenticated: true,
+      user: {
+        uid: userCred?.uid,
+        name: userCred?.displayName,
+        email: userCred?.email,
+      },
+    });
+  };
 
   const handleSubmit = async () => {
     try {
@@ -41,22 +59,29 @@ const LoginForm = ({ handleIndex }) => {
       );
 
       if (userCred) {
-        console.log('[handleSubmit] userCred', userCred);
-
-        setAuth({
-          ...auth,
-          authenticated: !!userCred?.uid,
-          user: {
-            uid: userCred?.uid,
-            name: userCred?.displayName,
-            email: userCred?.email,
-          },
-        });
+        authenticateUser(userCred);
       }
     } catch (error) {
       console.log('[handleSubmit] error', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      const response = await signInWithPopup(fbAuth, provider);
+
+      // const credential = GoogleAuthProvider.credentialFromResult(response);
+      // const token = credential.accessToken;
+      // const user = response.user;
+
+      // console.log('[handleGoogleLogin] credential', credential);
+      if (response.user) {
+        authenticateUser(response.user);
+      }
+    } catch (error) {
+      console.log('[handleGoogleLogin] error', error);
     }
   };
 
@@ -124,6 +149,7 @@ const LoginForm = ({ handleIndex }) => {
             width={50}
             height={50}
             icon={<Ionicons name="logo-google" size={24} color="#4b39ef" />}
+            onPress={handleGoogleLogin}
           />
           <IconButton
             variant="outline"

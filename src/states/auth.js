@@ -1,7 +1,7 @@
 import { atom } from 'recoil';
 
 const initialState = {
-  authenticated: true,
+  authenticated: false,
   user: null,
 };
 

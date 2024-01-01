@@ -7,18 +7,34 @@ import {
   VStack,
   IconButton,
   Text,
+  Toast,
 } from 'native-base';
 import { Ionicons } from '@expo/vector-icons';
-import { collection, addDoc, getFirestore } from 'firebase/firestore';
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import {
+  collection,
+  addDoc,
+  where,
+  getFirestore,
+  getCountFromServer,
+  query,
+} from 'firebase/firestore';
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
+} from 'firebase/auth';
+import { useRecoilState } from 'recoil';
 
 import AppInput from '../../../../components/app-input';
 import AppButton from '../../../../components/app-button';
 
 import app from '../../../../../firebaseConfig';
+import states from '../../../../states';
 
 const db = getFirestore(app);
-const auth = getAuth(app);
+const fbAuth = getAuth(app);
+const provider = new GoogleAuthProvider();
 
 const RegisterForm = ({ handleIndex }) => {
   const [loading, setLoading] = useState(false);
@@ -32,31 +48,74 @@ const RegisterForm = ({ handleIndex }) => {
     confirmPassword: false,
   });
 
+  const [auth, setAuth] = useRecoilState(states.auth);
+
+  const checkUser = async user => {
+    const querySnapshot = await getCountFromServer(
+      query(collection(db, 'users'), where('uid', '==', user.uid))
+    );
+
+    console.log('[checkUser] querySnapshot', querySnapshot.data().count);
+    return querySnapshot.data().count > 0;
+  };
+
+  const authenticateUser = async user => {
+    const exists = await checkUser(user);
+    console.log('[authenticateUser] exists', exists);
+
+    if (!exists) {
+      await addDoc(collection(db, 'users'), {
+        email: user.email,
+        uid: user.uid,
+        createdAt: new Date(),
+      });
+      setAuth({
+        ...auth,
+        authenticated: true,
+        user: {
+          uid: user.uid,
+          name: user.displayName,
+          email: user.email,
+        },
+      });
+    }
+  };
+
   const handleSubmit = async () => {
     try {
       setLoading(true);
 
       const userCred = await createUserWithEmailAndPassword(
-        auth,
+        fbAuth,
         value.email,
         value.password
       );
 
-      if (userCred) {
-        console.log('[handleSubmit] userCred', userCred);
-
-        const response = await addDoc(collection(db, 'users'), {
-          email: userCred.user.email,
-          uid: userCred.user.uid,
-          createdAt: new Date(),
-        });
-
-        console.log('[handleSubmit] response', response);
+      if (userCred && userCred.user) {
+        authenticateUser(userCred.user);
       }
     } catch (error) {
       console.log('[handleSubmit] error', error);
+      Toast.show({
+        title: 'Error!',
+        description: error.message,
+        colorScheme: 'danger',
+        placement: 'top',
+      });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      const response = await signInWithPopup(fbAuth, provider);
+
+      if (response.user) {
+        authenticateUser(response.user);
+      }
+    } catch (error) {
+      console.log('[handleGoogleLogin] error', error);
     }
   };
 
@@ -158,6 +217,7 @@ const RegisterForm = ({ handleIndex }) => {
 
         <HStack space={4} justifyContent="center">
           <IconButton
+            onPress={handleGoogleLogin}
             variant="outline"
             borderRadius="full"
             width={50}
