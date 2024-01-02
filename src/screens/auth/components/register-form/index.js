@@ -11,32 +11,21 @@ import {
 } from 'native-base';
 import { Ionicons } from '@expo/vector-icons';
 import {
-  collection,
-  addDoc,
-  where,
-  getFirestore,
-  getCountFromServer,
-  query,
-} from 'firebase/firestore';
-import {
   getAuth,
   createUserWithEmailAndPassword,
   signInWithPopup,
   GoogleAuthProvider,
 } from 'firebase/auth';
-import { useRecoilState } from 'recoil';
 
 import AppInput from '../../../../components/app-input';
 import AppButton from '../../../../components/app-button';
 
 import app from '../../../../../firebaseConfig';
-import states from '../../../../states';
 
-const db = getFirestore(app);
 const fbAuth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-const RegisterForm = ({ handleIndex }) => {
+const RegisterForm = ({ redirect, authenticateUser }) => {
   const [loading, setLoading] = useState(false);
   const [value, setValue] = useState({
     email: '',
@@ -47,39 +36,6 @@ const RegisterForm = ({ handleIndex }) => {
     password: false,
     confirmPassword: false,
   });
-
-  const [auth, setAuth] = useRecoilState(states.auth);
-
-  const checkUser = async user => {
-    const querySnapshot = await getCountFromServer(
-      query(collection(db, 'users'), where('uid', '==', user.uid))
-    );
-
-    console.log('[checkUser] querySnapshot', querySnapshot.data().count);
-    return querySnapshot.data().count > 0;
-  };
-
-  const authenticateUser = async user => {
-    const exists = await checkUser(user);
-    console.log('[authenticateUser] exists', exists);
-
-    if (!exists) {
-      await addDoc(collection(db, 'users'), {
-        email: user.email,
-        uid: user.uid,
-        createdAt: new Date(),
-      });
-      setAuth({
-        ...auth,
-        authenticated: true,
-        user: {
-          uid: user.uid,
-          name: user.displayName,
-          email: user.email,
-        },
-      });
-    }
-  };
 
   const handleSubmit = async () => {
     try {
@@ -116,6 +72,12 @@ const RegisterForm = ({ handleIndex }) => {
       }
     } catch (error) {
       console.log('[handleGoogleLogin] error', error);
+      Toast.show({
+        title: 'Google Error!',
+        description: error.message,
+        colorScheme: 'danger',
+        placement: 'top',
+      });
     }
   };
 
@@ -235,7 +197,11 @@ const RegisterForm = ({ handleIndex }) => {
 
         <Text marginTop={12} textAlign="center" color="gray.800">
           Har du ikke en konto endnu?
-          <AppButton variant="link" text="Log ind" onPress={handleIndex} />
+          <AppButton
+            variant="link"
+            text="Log ind"
+            onPress={(redirect, authenticateUser)}
+          />
         </Text>
       </VStack>
     </ScrollView>

@@ -8,6 +8,7 @@ import Landing from './screens/landing';
 
 import states from './states';
 import app from '../firebaseConfig';
+import Private from './navigators/private';
 
 const fbAuth = getAuth(app);
 
@@ -48,7 +49,7 @@ const RootContainer = () => {
     return <Text>Loading...</Text>;
   }
 
-  return <Fragment>{authenticated ? <Landing /> : <Public />}</Fragment>;
+  return <Fragment>{authenticated ? <Private /> : <Public />}</Fragment>;
 };
 
 export default RootContainer;

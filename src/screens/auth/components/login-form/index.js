@@ -7,46 +7,31 @@ import {
   VStack,
   Text,
   HStack,
+  Toast,
 } from 'native-base';
 import { Ionicons } from '@expo/vector-icons';
 import {
   getAuth,
+  GoogleAuthProvider,
   signInWithEmailAndPassword,
   signInWithPopup,
-  GoogleAuthProvider,
 } from 'firebase/auth';
-import { useRecoilState } from 'recoil';
 
 import AppInput from '../../../../components/app-input';
 import AppButton from '../../../../components/app-button';
 
-import states from '../../../../states';
 import app from '../../../../../firebaseConfig';
 
 const fbAuth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-const LoginForm = ({ handleIndex }) => {
+const LoginForm = ({ redirect, authenticateUser }) => {
   const [loading, setLoading] = useState(false);
   const [value, setValue] = useState({
     email: '',
     password: '',
   });
   const [showPassword, setShowPassword] = useState(false);
-
-  const [auth, setAuth] = useRecoilState(states.auth);
-
-  const authenticateUser = userCred => {
-    setAuth({
-      ...auth,
-      authenticated: true,
-      user: {
-        uid: userCred?.uid,
-        name: userCred?.displayName,
-        email: userCred?.email,
-      },
-    });
-  };
 
   const handleSubmit = async () => {
     try {
@@ -63,6 +48,12 @@ const LoginForm = ({ handleIndex }) => {
       }
     } catch (error) {
       console.log('[handleSubmit] error', error);
+      Toast.show({
+        title: 'Error!',
+        description: error.message,
+        colorScheme: 'danger',
+        placement: 'top',
+      });
     } finally {
       setLoading(false);
     }
@@ -72,16 +63,17 @@ const LoginForm = ({ handleIndex }) => {
     try {
       const response = await signInWithPopup(fbAuth, provider);
 
-      // const credential = GoogleAuthProvider.credentialFromResult(response);
-      // const token = credential.accessToken;
-      // const user = response.user;
-
-      // console.log('[handleGoogleLogin] credential', credential);
       if (response.user) {
         authenticateUser(response.user);
       }
     } catch (error) {
       console.log('[handleGoogleLogin] error', error);
+      Toast.show({
+        title: 'Google Error!',
+        description: error.message,
+        colorScheme: 'danger',
+        placement: 'top',
+      });
     }
   };
 
@@ -162,7 +154,7 @@ const LoginForm = ({ handleIndex }) => {
 
         <Text marginTop={12} textAlign="center" color="gray.800">
           Har du allerede en bruger?
-          <AppButton variant="link" text="Tilmelde" onPress={handleIndex} />
+          <AppButton variant="link" text="Tilmelde" onPress={redirect} />
         </Text>
       </VStack>
     </ScrollView>
